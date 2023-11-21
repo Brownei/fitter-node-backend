@@ -4,18 +4,23 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const passport = require('passport');
-const Sequelize = require('./utils/database');
 const session = require('express-session')
+const cookieParser = require('cookie-parser')
+const bodyParser = require('body-parser')
 
 const middlewares = require('./utils/middlewares');
 const api = require('./api');
-const User = require('./api/user/model')
-
+const Sequelize = require('./utils/database');
 const app = express();
 
 app.use(morgan('dev'));
 app.use(helmet());
-app.use(cors());
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors({
+  origin: '*'
+}));
 app.use(express.json());
 
 app.get('/', (req, res) => {

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { compare } = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const logger = require('../../utils/logger')
 
 const User = require('../user/model');
 
@@ -25,19 +26,24 @@ async function loginUser(req, res, next) {
             return res.status(401).json({ message: "Wrong password, Please try again!" })
         }
 
-        const accessToken = jwt.sign(
-            {
-                "userInfo": {
-                    "username": user.dataValues.userName,
-                    "roles": user.dataValues.role
-                }
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '15m' }
-        )
+        // const accessToken = jwt.sign(
+        //     {
+        //         "userInfo": {
+        //             "username": user.dataValues.userName,
+        //             "roles": user.dataValues.role
+        //         }
+        //     },
+        //     process.env.JWT_SECRET,
+        //     { expiresIn: '15m' }
+        // )
     
         const refreshToken = jwt.sign(
-            { "username": user.dataValues.userName },
+            { 
+                "id": user.dataValues.id,
+                "email": user.dataValues.email,
+                "username": user.dataValues.userName,
+                "role": user.dataValues.role
+            },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         )
@@ -50,10 +56,13 @@ async function loginUser(req, res, next) {
         })
     
         // Send accessToken containing username and roles 
-        res.json({ accessToken })
+        res.json({ refreshToken })
 
     } catch (error) {
-        
+        logger.error(error)
+        console.log(error)
+        next(error)
+        return res.status(422).json(error)
     }
 }
 

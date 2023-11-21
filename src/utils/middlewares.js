@@ -19,26 +19,25 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-const verifyJWT = (req, res, next) => {
-    const authHeader = req.headers.authorization || req.headers.Authorization
+async function verifyAuth(req, res, next) {
+  const authHeader = req.headers.authorization || req.headers.Authorization
 
-    if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized' })
-    }
+  if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Unauthorized' })
+  }
 
-    const token = authHeader.split(' ')[1]
+  const token = authHeader.split(' ')[1]
 
-    jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN_SECRET,
-        (err, decoded) => {
-            if (err) return res.status(403).json({ message: 'Forbidden' })
-            req.user = decoded.UserInfo.username
-            req.roles = decoded.UserInfo.roles
-            next()
-        }
-    )
-} 
+  jwt.verify(
+      token,
+      process.env.JWT_SECRET,
+      (err, decoded) => {
+          if (err) return res.status(403).json({ message: 'Forbidden' })
+          req.user = decoded
+          next()
+      }
+  )
+}
 
 const limiter = rateLimit({
 	windowMs: 5 * 60 * 1000, // 5 minutes
@@ -54,6 +53,6 @@ const limiter = rateLimit({
 module.exports = {
   notFound,
   errorHandler,
-  verifyJWT,
+  verifyAuth,
   limiter
 };
