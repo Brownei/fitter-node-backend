@@ -10,7 +10,7 @@ async function getAllRequestsMade(req, res, next) {
 
         console.log(decoded)
 
-        if(!decoded || decoded.role === 'Client') {
+        if(!decoded) {
             return res.status(401).json("Unauthorized")
         }
 
